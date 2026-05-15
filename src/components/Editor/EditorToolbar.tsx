@@ -108,9 +108,43 @@ export default function EditorToolbar() {
                saveToHistory();
              }
           }} icon={<AlignCenter size={16} />} title="Center Horizontally" />
+          <ToolBtn onClick={() => {
+             if (canvas) {
+               canvas.centerObjectV(activeObject);
+               canvas.renderAll();
+               saveToHistory();
+             }
+          }} icon={<Layers size={16} />} title="Center Vertically" />
        </div>
 
        <div className="h-4 w-px bg-line"></div>
+
+       {/* Text Actions */}
+       {activeObject.type === 'i-text' && (
+         <>
+           <div className="flex items-center gap-1">
+             <ToolBtn 
+               onClick={() => updateProperty('fontWeight', (activeObject as any).fontWeight === 'bold' ? 'normal' : 'bold')} 
+               icon={<Bold size={16} />} 
+               title="Bold" 
+               className={(activeObject as any).fontWeight === 'bold' ? 'text-accent' : ''}
+             />
+             <ToolBtn 
+               onClick={() => updateProperty('fontStyle', (activeObject as any).fontStyle === 'italic' ? 'normal' : 'italic')} 
+               icon={<Italic size={16} />} 
+               title="Italic"
+               className={(activeObject as any).fontStyle === 'italic' ? 'text-accent' : ''}
+             />
+           </div>
+           <div className="h-4 w-px bg-line"></div>
+           <div className="flex items-center gap-1">
+             <ToolBtn onClick={() => updateProperty('textAlign', 'left')} icon={<AlignLeft size={16} />} title="Align Left" />
+             <ToolBtn onClick={() => updateProperty('textAlign', 'center')} icon={<AlignCenter size={16} />} title="Align Center" />
+             <ToolBtn onClick={() => updateProperty('textAlign', 'right')} icon={<AlignRight size={16} />} title="Align Right" />
+           </div>
+           <div className="h-4 w-px bg-line"></div>
+         </>
+       )}
 
        {/* Color & Opacity */}
        <div className="flex items-center gap-3">

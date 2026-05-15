@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, MoreVertical, LayoutGrid, List, Clock, Star, Trash, Folder } from 'lucide-react';
-import { db, auth } from '../lib/firebase.ts';
+import { db, auth, OperationType, handleFirestoreError } from '../lib/firebase.ts';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
 import toast from 'react-hot-toast';
@@ -20,17 +20,17 @@ export default function Dashboard() {
 
   const fetchDesigns = async () => {
     if (!auth.currentUser) return;
+    const path = 'designs';
     try {
       const q = query(
-        collection(db, 'designs'),
+        collection(db, path),
         where('ownerId', '==', auth.currentUser.uid),
         orderBy('updatedAt', 'desc')
       );
       const snapshot = await getDocs(q);
       setDesigns(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to load designs");
+      handleFirestoreError(error, OperationType.GET, path);
     } finally {
       setLoading(false);
     }
@@ -38,12 +38,13 @@ export default function Dashboard() {
 
   const createNewDesign = async () => {
     if (!auth.currentUser) return;
+    const path = 'designs';
     const loadingToast = toast.loading("Setting up your workspace...");
     try {
       const newDesign = {
         ownerId: auth.currentUser.uid,
         title: "Untitled Design",
-        canvasData: JSON.stringify({ version: "5.3.0", objects: [] }),
+        canvasData: JSON.stringify({ version: "6.0.0", objects: [] }),
         thumbnail: '',
         type: 'image',
         width: 1080,
@@ -53,12 +54,11 @@ export default function Dashboard() {
         isFavorite: false,
         isTrashed: false
       };
-      const docRef = await addDoc(collection(db, 'designs'), newDesign);
+      const docRef = await addDoc(collection(db, path), newDesign);
       toast.success("Workspace ready!", { id: loadingToast });
       navigate(`/editor/${docRef.id}`);
     } catch (error) {
-      console.error(error);
-      toast.error("Could not create design", { id: loadingToast });
+      handleFirestoreError(error, OperationType.CREATE, path);
     }
   };
 
@@ -203,11 +203,17 @@ function DesignCard({ design, onClick, view }: { design: any, onClick: () => voi
              </span>
              <span className="text-[10px] text-text-muted flex items-center gap-1 font-medium">
                 <Clock size={12} />
-                {new Date(design.updatedAt?.seconds * 1000).toLocaleDateString()}
+                {design.updatedAt?.seconds ? new Date(design.updatedAt.seconds * 1000).toLocaleDateString() : 'Just now'}
              </span>
           </div>
         </div>
-        <button className="p-2 hover:bg-bg-card rounded-md text-text-muted hover:text-white transition-colors">
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            toast("More options coming soon!");
+          }}
+          className="p-2 hover:bg-bg-card rounded-md text-text-muted hover:text-white transition-colors"
+        >
           <MoreVertical size={20} />
         </button>
       </div>
@@ -238,7 +244,13 @@ function DesignCard({ design, onClick, view }: { design: any, onClick: () => voi
              {design.width} × {design.height} PX
           </p>
         </div>
-        <button className="p-2 hover:bg-bg-card rounded-md text-text-muted hover:text-white">
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            toast("More options coming soon!");
+          }}
+          className="p-2 hover:bg-bg-card rounded-md text-text-muted hover:text-white"
+        >
           <MoreVertical size={16} />
         </button>
       </div>

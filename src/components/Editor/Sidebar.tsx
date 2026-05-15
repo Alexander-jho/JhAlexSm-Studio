@@ -11,7 +11,10 @@ import {
   Video as VideoIcon,
   Search,
   Plus,
-  Wand2
+  Wand2,
+  Square,
+  Circle,
+  Triangle
 } from 'lucide-react';
 import * as fabric from 'fabric';
 import { useEditorStore } from '../../store/useEditorStore.ts';
@@ -22,7 +25,7 @@ type Tab = 'templates' | 'elements' | 'text' | 'uploads' | 'images' | 'ai' | 'ma
 
 export default function Sidebar() {
   const [activeTab, setActiveTab] = useState<Tab>('elements');
-  const { canvas } = useEditorStore();
+  const { canvas, saveToHistory } = useEditorStore();
 
   const addText = (type: 'heading' | 'subheading' | 'body') => {
     if (!canvas) return;
@@ -111,6 +114,105 @@ export default function Sidebar() {
             )}
          </div>
 
+         {activeTab === 'templates' && (
+           <div className="grid grid-cols-2 gap-3">
+              <TemplateCard 
+                color="#fee2e2" 
+                title="Professional Studio" 
+                onClick={() => {
+                  if (!canvas) return;
+                  const text = new fabric.IText('STUDIO', {
+                    left: 100,
+                    top: 100,
+                    fontSize: 60,
+                    fontWeight: 'bold',
+                    fill: '#000000',
+                    fontFamily: 'Inter'
+                  });
+                  const rect = new fabric.Rect({
+                    left: 90,
+                    top: 150,
+                    width: 250,
+                    height: 10,
+                    fill: '#3b82f6'
+                  });
+                  canvas.add(rect, text);
+                  canvas.renderAll();
+                  saveToHistory();
+                }}
+              />
+              <TemplateCard 
+                color="#dcfce7" 
+                title="Eco Friendly" 
+                onClick={() => {
+                  if (!canvas) return;
+                  const text = new fabric.IText('NATURE', {
+                    left: 100,
+                    top: 100,
+                    fontSize: 50,
+                    fontWeight: 'bold',
+                    fill: '#166534',
+                    fontFamily: 'Inter'
+                  });
+                  const circle = new fabric.Circle({
+                    left: 150,
+                    top: 150,
+                    radius: 40,
+                    fill: '#22c55e',
+                    opacity: 0.6
+                  });
+                  canvas.add(circle, text);
+                  canvas.renderAll();
+                  saveToHistory();
+                }}
+              />
+              <TemplateCard 
+                color="#fef9c3" 
+                title="Flash Deals" 
+                onClick={() => {
+                  if (!canvas) return;
+                  const text = new fabric.IText('SALE', {
+                    left: 120,
+                    top: 100,
+                    fontSize: 80,
+                    fontWeight: 'black',
+                    fill: '#ef4444',
+                    fontFamily: 'Inter',
+                    angle: -5
+                  });
+                  canvas.add(text);
+                  canvas.renderAll();
+                  saveToHistory();
+                }}
+              />
+              <TemplateCard 
+                color="#dbeafe" 
+                title="New Arrival" 
+                onClick={() => {
+                  if (!canvas) return;
+                  const text = new fabric.IText('NEW', {
+                    left: 100,
+                    top: 100,
+                    fontSize: 40,
+                    fontWeight: 'bold',
+                    fill: '#1e40af',
+                    fontFamily: 'Inter'
+                  });
+                  const subtitle = new fabric.IText('ARRIVALS', {
+                    left: 100,
+                    top: 150,
+                    fontSize: 20,
+                    fill: '#1e40af',
+                    fontFamily: 'Inter'
+                  });
+                  canvas.add(text, subtitle);
+                  canvas.renderAll();
+                  saveToHistory();
+                }}
+              />
+           </div>
+         )}
+
          {activeTab === 'text' && (
            <div className="space-y-3">
               <button onClick={() => addText('heading')} className="w-full py-4 bg-bg-card border border-line rounded-md text-xl font-bold hover:bg-zinc-700 transition-colors">Add Heading</button>
@@ -121,14 +223,14 @@ export default function Sidebar() {
 
          {activeTab === 'elements' && (
            <div className="grid grid-cols-2 gap-3">
-              <div onClick={() => addShape('rect')} className="aspect-square bg-zinc-900 border border-white/5 rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-500/50 transition-all group">
-                 <div className="w-12 h-12 bg-zinc-700 rounded-sm group-hover:bg-blue-600 transition-colors"></div>
+              <div onClick={() => addShape('rect')} className="aspect-square bg-bg-card border border-line rounded-xl flex items-center justify-center cursor-pointer hover:border-accent transition-all group">
+                 <Square className="text-text-muted group-hover:text-accent transition-colors" size={32} />
               </div>
-              <div onClick={() => addShape('circle')} className="aspect-square bg-zinc-900 border border-white/5 rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-500/50 transition-all group">
-                 <div className="w-12 h-12 bg-zinc-700 rounded-full group-hover:bg-blue-600 transition-colors"></div>
+              <div onClick={() => addShape('circle')} className="aspect-square bg-bg-card border border-line rounded-xl flex items-center justify-center cursor-pointer hover:border-accent transition-all group">
+                 <Circle className="text-text-muted group-hover:text-accent transition-colors" size={32} />
               </div>
-              <div onClick={() => addShape('triangle')} className="aspect-square bg-zinc-900 border border-white/5 rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-500/50 transition-all group">
-                 <div className="w-0 h-0 border-l-[24px] border-l-transparent border-r-[24px] border-r-transparent border-b-[40px] border-b-zinc-700 group-hover:border-b-blue-600 transition-colors"></div>
+              <div onClick={() => addShape('triangle')} className="aspect-square bg-bg-card border border-line rounded-xl flex items-center justify-center cursor-pointer hover:border-accent transition-all group">
+                 <Triangle className="text-text-muted group-hover:text-accent transition-colors" size={32} />
               </div>
            </div>
          )}
@@ -150,7 +252,19 @@ export default function Sidebar() {
     </div>
   );
 }
-
+function TemplateCard({ color, title, onClick }: { color: string, title: string, onClick?: () => void }) {
+  return (
+    <div 
+      onClick={onClick}
+      className="aspect-[4/5] bg-bg-card border border-line rounded-md hover:border-accent transition-all cursor-pointer overflow-hidden flex flex-col group"
+    >
+       <div className="flex-1" style={{ backgroundColor: color }}></div>
+       <div className="p-2 border-t border-line">
+          <p className="text-[10px] font-bold text-text-muted transition-colors group-hover:text-white truncate">{title}</p>
+       </div>
+    </div>
+  );
+}
 function SidebarTab({ icon, label, active, onClick }: { icon: any, label: string, active: boolean, onClick: () => void }) {
   return (
     <button 

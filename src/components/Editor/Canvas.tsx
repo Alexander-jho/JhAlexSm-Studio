@@ -40,7 +40,7 @@ export default function Canvas({ design }: CanvasProps) {
     if (design.canvasData) {
       try {
         const data = JSON.parse(design.canvasData);
-        fabricCanvas.loadFromJSON(data, () => {
+        fabricCanvas.loadFromJSON(data).then(() => {
           fabricCanvas.renderAll();
           saveToHistory();
         });

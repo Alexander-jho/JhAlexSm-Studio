@@ -37,7 +37,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (!canvas || historyIndex <= 0) return;
     const prevIndex = historyIndex - 1;
     const prevData = history[prevIndex];
-    canvas.loadFromJSON(prevData, () => {
+    canvas.loadFromJSON(JSON.parse(prevData)).then(() => {
       canvas.renderAll();
       set({ historyIndex: prevIndex });
     });
@@ -47,7 +47,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (!canvas || historyIndex >= history.length - 1) return;
     const nextIndex = historyIndex + 1;
     const nextData = history[nextIndex];
-    canvas.loadFromJSON(nextData, () => {
+    canvas.loadFromJSON(JSON.parse(nextData)).then(() => {
       canvas.renderAll();
       set({ historyIndex: nextIndex });
     });

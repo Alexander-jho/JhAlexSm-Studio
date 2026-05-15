@@ -104,22 +104,13 @@ async function startServer() {
   } else {
     // In dev, use vite's own server as middleware
     const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'custom',
+      server: { 
+        middlewareMode: true,
+        hmr: false
+      },
+      appType: 'spa',
     });
     app.use(vite.middlewares);
-    
-    app.use('*', async (req, res, next) => {
-      if (req.originalUrl.startsWith('/api')) return next();
-      try {
-        const url = req.originalUrl;
-        const html = await vite.transformIndexHtml(url, `<!DOCTYPE html><html><head></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>`);
-        res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
-      } catch (e) {
-        vite.ssrFixStacktrace(e as any);
-        next(e);
-      }
-    });
   }
 
   server.listen(PORT, '0.0.0.0', () => {

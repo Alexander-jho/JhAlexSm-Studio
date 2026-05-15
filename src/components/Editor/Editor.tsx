@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as fabric from 'fabric';
-import { db } from '../../lib/firebase.ts';
+import { db, OperationType, handleFirestoreError } from '../../lib/firebase.ts';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { useEditorStore } from '../../store/useEditorStore.ts';
 import Sidebar from './Sidebar.tsx';
@@ -25,6 +25,7 @@ export default function Editor() {
 
   const fetchDesign = async () => {
     if (!id) return;
+    const path = `designs/${id}`;
     try {
       const docRef = doc(db, 'designs', id);
       const snapshot = await getDoc(docRef);
@@ -35,8 +36,7 @@ export default function Editor() {
       }
       setDesign({ id: snapshot.id, ...snapshot.data() });
     } catch (error) {
-      console.error(error);
-      toast.error("Error loading design");
+      handleFirestoreError(error, OperationType.GET, path);
     } finally {
       setLoading(false);
     }
@@ -44,6 +44,7 @@ export default function Editor() {
 
   const handleSave = async () => {
     if (!canvas || !id) return;
+    const path = `designs/${id}`;
     const loadingToast = toast.loading("Saving changes...");
     try {
       const docRef = doc(db, 'designs', id);
@@ -61,8 +62,7 @@ export default function Editor() {
       });
       toast.success("Saved successfully", { id: loadingToast });
     } catch (error) {
-      console.error(error);
-      toast.error("Save failed", { id: loadingToast });
+      handleFirestoreError(error, OperationType.WRITE, path);
     }
   };
 
