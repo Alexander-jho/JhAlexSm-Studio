@@ -35,7 +35,7 @@ export default function Toolbar({ design, onSave }: ToolbarProps) {
       dataURL = URL.createObjectURL(blob);
     } else {
       dataURL = canvas.toDataURL({
-        format,
+        format: format === 'jpg' ? 'jpeg' : format,
         quality: 1,
         multiplier: 2 // High quality export
       });

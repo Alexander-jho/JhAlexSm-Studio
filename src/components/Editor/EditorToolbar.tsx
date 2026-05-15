@@ -47,36 +47,45 @@ export default function EditorToolbar() {
     saveToHistory();
   };
 
-  const duplicate = () => {
-     activeObject.clone((cloned: any) => {
-        canvas?.discardActiveObject();
+  const duplicate = async () => {
+     if (!canvas || !activeObject) return;
+     try {
+        const cloned = await activeObject.clone();
+        canvas.discardActiveObject();
         cloned.set({
            left: (cloned.left || 0) + 20,
            top: (cloned.top || 0) + 20,
            evented: true,
         });
-        if (cloned.type === 'activeSelection') {
-           cloned.canvas = canvas;
-           cloned.forEachObject((obj: any) => canvas?.add(obj));
-           cloned.setCoords();
+        
+        if (cloned.type === 'activeselection') {
+           // For active selection, we need to handle its objects
+           const selection = cloned as any;
+           selection.canvas = canvas;
+           selection.forEachObject((obj: any) => canvas.add(obj));
+           selection.setCoords();
         } else {
-           canvas?.add(cloned);
+           canvas.add(cloned);
         }
-        canvas?.setActiveObject(cloned);
-        canvas?.requestRenderAll();
+        canvas.setActiveObject(cloned);
+        canvas.requestRenderAll();
         saveToHistory();
-     });
+     } catch (err) {
+        console.error(err);
+     }
   };
 
   const bringForward = () => {
-     activeObject.bringForward();
-     canvas?.renderAll();
+     if (!canvas || !activeObject) return;
+     canvas.bringObjectForward(activeObject);
+     canvas.renderAll();
      saveToHistory();
   };
 
   const sendBackward = () => {
-     activeObject.sendBackwards();
-     canvas?.renderAll();
+     if (!canvas || !activeObject) return;
+     canvas.sendObjectBackwards(activeObject);
+     canvas.renderAll();
      saveToHistory();
   };
 
@@ -93,9 +102,11 @@ export default function EditorToolbar() {
        {/* Alignment */}
        <div className="flex items-center gap-1">
           <ToolBtn onClick={() => {
-             activeObject.centerH();
-             canvas?.renderAll();
-             saveToHistory();
+             if (canvas) {
+               canvas.centerObjectH(activeObject);
+               canvas.renderAll();
+               saveToHistory();
+             }
           }} icon={<AlignCenter size={16} />} title="Center Horizontally" />
        </div>
 

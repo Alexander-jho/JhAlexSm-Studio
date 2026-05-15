@@ -106,7 +106,7 @@ export default function LandingPage() {
                title="Unlimited Library"
                description="Millions of photos, icons, and templates at your fingertips. All available for free, always."
             />
-            <featureCard 
+            <FeatureCard 
                icon={<Sparkles className="text-purple-500" />}
                title="AI Powered"
                description="Generate high-end imagery and copy using Gemini AI. Enhance your creative workflow instantly."

@@ -65,7 +65,7 @@ export default function Canvas({ design }: CanvasProps) {
        }
        if (e.key === 'Delete' || e.key === 'Backspace') {
           const active = fabricCanvas.getActiveObject();
-          if (active && (!active.isEditing)) {
+          if (active && !(active as any).isEditing) {
              fabricCanvas.remove(active);
              fabricCanvas.discardActiveObject();
              fabricCanvas.renderAll();

@@ -181,7 +181,7 @@ function NavItem({ icon, label, active = false }: { icon: any, label: string, ac
   );
 }
 
-function DesignCard({ design, onClick, view }: { design: any, onClick: () => void, view: 'grid' | 'list' }) {
+function DesignCard({ design, onClick, view }: { design: any, onClick: () => void, view: 'grid' | 'list', key?: string }) {
   if (view === 'list') {
     return (
       <div 

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   Type, 
   Image as ImageIcon, 
@@ -16,6 +16,7 @@ import {
 import * as fabric from 'fabric';
 import { useEditorStore } from '../../store/useEditorStore.ts';
 import toast from 'react-hot-toast';
+import { ChangeEvent } from 'react';
 
 type Tab = 'templates' | 'elements' | 'text' | 'uploads' | 'images' | 'ai' | 'magic';
 
@@ -61,18 +62,22 @@ export default function Sidebar() {
     canvas.renderAll();
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !canvas) return;
     const reader = new FileReader();
-    reader.onload = (f) => {
+    reader.onload = async (f) => {
       const data = f.target?.result as string;
-      fabric.Image.fromURL(data, (img) => {
+      try {
+        const img = await fabric.FabricImage.fromURL(data);
         img.scaleToWidth(200);
         canvas.add(img);
         canvas.centerObject(img);
         canvas.renderAll();
-      });
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load image");
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -178,13 +183,17 @@ function AITools() {
       const data = await response.json();
       if (data.error) throw new Error(data.error);
 
-      fabric.Image.fromURL(data.imageUrl, (img) => {
+      try {
+        const img = await fabric.FabricImage.fromURL(data.imageUrl);
         img.scaleToWidth(400);
         canvas.add(img);
         canvas.centerObject(img);
         canvas.renderAll();
         toast.success("Image generated!", { id });
-      });
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to add generated image", { id });
+      }
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || "Failed to generate image", { id });
