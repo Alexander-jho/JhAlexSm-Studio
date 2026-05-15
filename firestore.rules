@@ -1,0 +1,60 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.uid == request.auth.uid &&
+               data.email is string && data.email.size() <= 256;
+      }
+
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().createdAt == request.time;
+      allow update: if isOwner(userId) && isValidUser(incoming()) &&
+                    incoming().updatedAt == request.time &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'username', 'updatedAt']);
+    }
+
+    match /designs/{designId} {
+      function isValidDesign(data) {
+        return data.ownerId == request.auth.uid &&
+               data.title is string && data.title.size() <= 200 &&
+               data.canvasData is string && data.canvasData.size() <= 10485760;
+      }
+
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidDesign(incoming()) && incoming().createdAt == request.time;
+      allow update: if isSignedIn() && isOwner(existing().ownerId) && isValidDesign(incoming()) &&
+                    incoming().updatedAt == request.time &&
+                    (
+                      incoming().diff(existing()).affectedKeys().hasOnly(['title', 'canvasData', 'thumbnail', 'updatedAt', 'isFavorite', 'isTrashed'])
+                    );
+      allow delete: if isSignedIn() && isOwner(existing().ownerId);
+    }
+  }
+}

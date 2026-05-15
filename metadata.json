@@ -1,0 +1,11 @@
+{
+  "name": "JhAlexMS-Studio",
+  "description": "A professional all-in-one graphic design, multimedia, and advanced visual creation platform.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
